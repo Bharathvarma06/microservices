@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  auth-service:
+    image: bharathvarma06/auth-service
+    build: ./auth-service
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://authuser:authpass@auth-mysql/authdb
+    depends_on:
+      - auth-mysql
+
+  auth-mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: authdb
+      MYSQL_USER: authuser
+      MYSQL_PASSWORD: authpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3306:3306"
+
+  product-service:
+    image: bharathvarma06/product-service
+    build: ./product-service
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://productuser:productpass@product-mysql/productdb
+    depends_on:
+      - product-mysql
+
+  product-mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: productdb
+      MYSQL_USER: productuser
+      MYSQL_PASSWORD: productpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+
+  order-service:
+    image: bharathvarma06/order-service
+    build: ./order-service
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://orderuser:orderpass@order-mysql/orderdb
+      PRODUCT_SERVICE_URL: http://product-service:8000
+    depends_on:
+      - order-mysql
+      - product-service
+
+  order-mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: orderdb
+      MYSQL_USER: orderuser
+      MYSQL_PASSWORD: orderpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3308:3306"
